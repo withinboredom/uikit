@@ -642,26 +642,26 @@
             // custom scroll observer
             requestAnimationFrame((function(){
 
-                var memory = {x: window.pageXOffset, y:window.pageYOffset}, dir;
+            var memory = {dir: {x:0, y:0}, x: window.pageXOffset, y:window.pageYOffset};
 
-                var fn = function(){
+            var fn = function(){
+                var wpxo = window.pageXOffset;
+                var wpyo = window.pageYOffset;
 
-                    if (memory.x != window.pageXOffset || memory.y != window.pageYOffset) {
+                if (memory.x != wpxo || memory.y != wpyo) {
 
-                        dir = {x: 0 , y: 0};
+                    if (wpxo != memory.x) memory.dir.x = wpxo > memory.x ? 1:-1;
+                    if (wpyo != memory.y) memory.dir.y = wpyo > memory.y ? 1:-1;
+                    memory.x = wpxo;
+                    memory.y = wpyo;
 
-                        if (window.pageXOffset != memory.x) dir.x = window.pageXOffset > memory.x ? 1:-1;
-                        if (window.pageYOffset != memory.y) dir.y = window.pageYOffset > memory.y ? 1:-1;
+                    UI.$doc.trigger('scrolling.uk.document', {
+                        "dir": {"x": memory.dir.x, "y": memory.dir.y}, "x": wpxo, "y": wpyo
+                    });
+                }
 
-                        memory = {
-                            "dir": dir, "x": window.pageXOffset, "y": window.pageYOffset
-                        };
-
-                        UI.$doc.trigger('scrolling.uk.document', [memory]);
-                    }
-
-                    requestAnimationFrame(fn);
-                };
+                requestAnimationFrame(fn);
+            };
 
                 if (UI.support.touch) {
                     UI.$html.on('touchmove touchend MSPointerMove MSPointerUp pointermove pointerup', fn);
